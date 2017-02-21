@@ -516,7 +516,8 @@
 
       // short-circuit
       var lineWidth = this._getLineWidth(ctx, lineIndex);
-      if (this.textAlign !== 'justify' || this.width < lineWidth) {
+      if (this.textAlign !== 'justify' || this.width < lineWidth
+            || (lineIndex === this._textLines.length - 1)) {
         this._renderChars(method, ctx, line, left, top, lineIndex);
         return;
       }
