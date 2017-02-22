@@ -25666,7 +25666,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
 
 
 (function() {
-
+  var GraphemeBreaker = require('grapheme-breaker');
   var clone = fabric.util.object.clone;
 
   fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.prototype */ {
@@ -26305,7 +26305,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         _char + this.text.slice(this.selectionEnd);
       this._textLines = this._splitTextIntoLines();
       this.insertStyleObjects(_char, isEndOfLine, styleObject);
-      this.selectionStart += _char.length;
+      this.selectionStart += GraphemeBreaker.countBreaks(_char);
       this.selectionEnd = this.selectionStart;
       if (skipUpdate) {
         return;
