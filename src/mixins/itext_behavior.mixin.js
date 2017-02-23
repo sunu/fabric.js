@@ -1,5 +1,5 @@
 (function() {
-  var GraphemeBreaker = require('grapheme-breaker');
+
   var clone = fabric.util.object.clone;
 
   fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.prototype */ {
@@ -638,7 +638,7 @@
         _char + this.text.slice(this.selectionEnd);
       this._textLines = this._splitTextIntoLines();
       this.insertStyleObjects(_char, isEndOfLine, styleObject);
-      this.selectionStart += GraphemeBreaker.countBreaks(_char);
+      this.selectionStart += _char.length;
       this.selectionEnd = this.selectionStart;
       if (skipUpdate) {
         return;

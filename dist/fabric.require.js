@@ -12052,6 +12052,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
 })(typeof exports !== "undefined" ? exports : this);
 
 (function() {
+    var GraphemeBreaker = require("grapheme-breaker");
     var clone = fabric.util.object.clone;
     fabric.IText = fabric.util.createClass(fabric.Text, fabric.Observable, {
         type: "i-text",
@@ -12569,15 +12570,16 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         },
         _getWidthOfCharsAt: function(ctx, lineIndex, charIndex) {
             var width = 0, i, _char;
+            var graphemes = GraphemeBreaker.break(this._textLines[lineIndex]);
             for (i = 0; i < charIndex; i++) {
-                _char = this._textLines[lineIndex][i];
+                _char = graphemes[i];
                 width += this._getWidthOfChar(ctx, _char, lineIndex, i);
             }
             return width;
         },
         _measureLine: function(ctx, lineIndex) {
             this._isMeasuring = true;
-            var width = this._getWidthOfCharsAt(ctx, lineIndex, this._textLines[lineIndex].length);
+            var width = this._getWidthOfCharsAt(ctx, lineIndex, GraphemeBreaker.countBreaks(this._textLines[lineIndex]));
             if (this.charSpacing !== 0) {
                 width -= this._getWidthOfCharSpacing();
             }
@@ -12594,7 +12596,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         },
         _getWidthOfWords: function(ctx, line, lineIndex, charOffset) {
             var width = 0;
-            for (var charIndex = 0; charIndex < line.length; charIndex++) {
+            for (var charIndex = 0; charIndex < GraphemeBreaker.countBreaks(line); charIndex++) {
                 var _char = line[charIndex];
                 if (!_char.match(/\s/)) {
                     width += this._getWidthOfChar(ctx, _char, lineIndex, charIndex + charOffset);
@@ -12636,7 +12638,6 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
 })();
 
 (function() {
-    var GraphemeBreaker = require("grapheme-breaker");
     var clone = fabric.util.object.clone;
     fabric.util.object.extend(fabric.IText.prototype, {
         initBehavior: function() {
@@ -13051,7 +13052,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
             this.text = this.text.slice(0, this.selectionStart) + _char + this.text.slice(this.selectionEnd);
             this._textLines = this._splitTextIntoLines();
             this.insertStyleObjects(_char, isEndOfLine, styleObject);
-            this.selectionStart += GraphemeBreaker.countBreaks(_char);
+            this.selectionStart += _char.length;
             this.selectionEnd = this.selectionStart;
             if (skipUpdate) {
                 return;
@@ -13770,6 +13771,7 @@ fabric.util.object.extend(fabric.IText.prototype, {
 
 (function(global) {
     "use strict";
+    var GraphemeBreaker = require("grapheme-breaker");
     var fabric = global.fabric || (global.fabric = {});
     fabric.Textbox = fabric.util.createClass(fabric.IText, fabric.Observable, {
         type: "textbox",
@@ -13949,11 +13951,11 @@ fabric.util.object.extend(fabric.IText.prototype, {
             };
         },
         _getCursorBoundariesOffsets: function(chars, typeOfBoundaries) {
-            var topOffset = 0, leftOffset = 0, cursorLocation = this.get2DCursorLocation(), lineChars = this._textLines[cursorLocation.lineIndex].split(""), lineLeftOffset = this._getLineLeftOffset(this._getLineWidth(this.ctx, cursorLocation.lineIndex));
-            for (var i = 0; i < cursorLocation.charIndex; i++) {
-                leftOffset += this._getWidthOfChar(this.ctx, lineChars[i], cursorLocation.lineIndex, i);
-            }
-            for (i = 0; i < cursorLocation.lineIndex; i++) {
+            var topOffset = 0, leftOffset = 0, cursorLocation = this.get2DCursorLocation(), lineLeftOffset = this._getLineLeftOffset(this._getLineWidth(this.ctx, cursorLocation.lineIndex));
+            var chars = this._textLines[cursorLocation.lineIndex].substring(0, cursorLocation.charIndex);
+            var charIndex = GraphemeBreaker.countBreaks(chars);
+            leftOffset += this._getWidthOfChar(this.ctx, chars, cursorLocation.lineIndex, charIndex);
+            for (var i = 0; i < cursorLocation.lineIndex; i++) {
                 topOffset += this._getHeightOfLine(this.ctx, i);
             }
             if (typeOfBoundaries === "cursor") {

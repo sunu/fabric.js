@@ -2,6 +2,7 @@
 
   'use strict';
 
+  var GraphemeBreaker = require('grapheme-breaker');
   var fabric = global.fabric || (global.fabric = {});
 
   /**
@@ -408,14 +409,13 @@
       var topOffset      = 0,
           leftOffset     = 0,
           cursorLocation = this.get2DCursorLocation(),
-          lineChars      = this._textLines[cursorLocation.lineIndex].split(''),
           lineLeftOffset = this._getLineLeftOffset(this._getLineWidth(this.ctx, cursorLocation.lineIndex));
 
-      for (var i = 0; i < cursorLocation.charIndex; i++) {
-        leftOffset += this._getWidthOfChar(this.ctx, lineChars[i], cursorLocation.lineIndex, i);
-      }
+      var chars = this._textLines[cursorLocation.lineIndex].substring(0, cursorLocation.charIndex);
+      var charIndex = GraphemeBreaker.countBreaks(chars);
+      leftOffset += this._getWidthOfChar(this.ctx, chars, cursorLocation.lineIndex, charIndex);
 
-      for (i = 0; i < cursorLocation.lineIndex; i++) {
+      for (var i = 0; i < cursorLocation.lineIndex; i++) {
         topOffset += this._getHeightOfLine(this.ctx, i);
       }
 

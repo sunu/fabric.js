@@ -1,5 +1,6 @@
 (function() {
 
+  var GraphemeBreaker = require('grapheme-breaker');
   var clone = fabric.util.object.clone;
 
   /**
@@ -1078,8 +1079,9 @@
      */
     _getWidthOfCharsAt: function(ctx, lineIndex, charIndex) {
       var width = 0, i, _char;
+      var graphemes = GraphemeBreaker.break(this._textLines[lineIndex]);
       for (i = 0; i < charIndex; i++) {
-        _char = this._textLines[lineIndex][i];
+        _char = graphemes[i];
         width += this._getWidthOfChar(ctx, _char, lineIndex, i);
       }
       return width;
@@ -1093,7 +1095,7 @@
      */
     _measureLine: function(ctx, lineIndex) {
       this._isMeasuring = true;
-      var width = this._getWidthOfCharsAt(ctx, lineIndex, this._textLines[lineIndex].length);
+      var width = this._getWidthOfCharsAt(ctx, lineIndex, GraphemeBreaker.countBreaks(this._textLines[lineIndex]));
       if (this.charSpacing !== 0) {
         width -= this._getWidthOfCharSpacing();
       }
@@ -1129,7 +1131,7 @@
     _getWidthOfWords: function (ctx, line, lineIndex, charOffset) {
       var width = 0;
 
-      for (var charIndex = 0; charIndex < line.length; charIndex++) {
+      for (var charIndex = 0; charIndex < GraphemeBreaker.countBreaks(line); charIndex++) {
         var _char = line[charIndex];
 
         if (!_char.match(/\s/)) {
