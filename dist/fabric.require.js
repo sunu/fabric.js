@@ -10630,6 +10630,14 @@ fabric.util.object.extend(fabric.Object.prototype, {
             this._stroke(ctx);
             this._renderStroke(ctx);
         },
+        render: function(ctx, noTransform) {
+            if (!this.active || noTransform || this.group && this.group !== this.canvas.getActiveGroup()) {
+                this.set("opacity", 1);
+            } else {
+                this.set("opacity", .3);
+            }
+            this.callSuper("render", ctx, noTransform);
+        },
         _needsResize: function() {
             return this.scaleX !== this._lastScaleX || this.scaleY !== this._lastScaleY;
         },

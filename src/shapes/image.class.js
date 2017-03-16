@@ -479,6 +479,17 @@
       this._renderStroke(ctx);
     },
 
+    render: function(ctx, noTransform) {
+      if (!this.active || noTransform
+          || (this.group && this.group !== this.canvas.getActiveGroup())) {
+        this.set('opacity', 1);
+      }
+      else {
+        this.set('opacity', 0.3);
+      }
+      this.callSuper('render', ctx, noTransform);
+    },
+
     /**
      * @private, needed to check if image needs resize
      */
