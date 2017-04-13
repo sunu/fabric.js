@@ -582,29 +582,31 @@
       for (var i = startLine; i <= endLine; i++) {
         var lineOffset = this._getLineLeftOffset(this._getLineWidth(ctx, i)) || 0,
             lineHeight = this._getHeightOfLine(this.ctx, i),
-            realLineHeight = 0, boxWidth = 0, line = this._textLines[i];
-
+            realLineHeight = 0, boxWidth = 0;
         if (i === startLine) {
-          for (var j = 0, len = line.length; j < len; j++) {
-            if (j >= start.charIndex && (i !== endLine || j < end.charIndex)) {
-              boxWidth += this._getWidthOfChar(ctx, line[j], i, j);
-            }
-            if (j < start.charIndex) {
-              lineOffset += this._getWidthOfChar(ctx, line[j], i, j);
-            }
+          var chars = this._textLines[i].substring(0, start.charIndex);
+          var charIndex = GraphemeBreaker.countBreaks(chars);
+          lineOffset += this._getWidthOfChar(this.ctx, chars, start.lineIndex, charIndex);
+
+          var chars = this._textLines[i].substring(start.charIndex, end.charIndex);
+          var charIndex = GraphemeBreaker.countBreaks(chars);
+          if (i === endLine) {
+            boxWidth += this._getWidthOfChar(this.ctx, chars, start.lineIndex, charIndex);
           }
-          if (j === line.length) {
-            boxWidth -= this._getWidthOfCharSpacing();
+          else {
+            var chars = this._textLines[i].substring(start.charIndex);
+            var charIndex = GraphemeBreaker.countBreaks(chars);
+            boxWidth += this._getWidthOfChar(this.ctx, chars, start.lineIndex, charIndex);
           }
         }
         else if (i > startLine && i < endLine) {
           boxWidth += this._getLineWidth(ctx, i) || 5;
         }
         else if (i === endLine) {
-          for (var j2 = 0, j2len = end.charIndex; j2 < j2len; j2++) {
-            boxWidth += this._getWidthOfChar(ctx, line[j2], i, j2);
-          }
-          if (end.charIndex === line.length) {
+          chars = this._textLines[i].substring(0, end.charIndex);
+          charIndex = GraphemeBreaker.countBreaks(chars);
+          boxWidth += this._getWidthOfChar(this.ctx, chars, end.lineIndex, charIndex);
+          if (end.charIndex === this._textLines[i].length) {
             boxWidth -= this._getWidthOfCharSpacing();
           }
         }
